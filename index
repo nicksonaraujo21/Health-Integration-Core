@@ -1,0 +1,514 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/prototipo-health-integration-core.html b/prototipo-health-integration-core.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..cdac44f257d81a726cfc00fd5c1723641601e852
+--- /dev/null
++++ b/prototipo-health-integration-core.html
+@@ -0,0 +1,504 @@
++<!doctype html>
++<html lang="pt-BR">
++<head>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Health Integration Core — Protótipo</title>
++  <style>
++    :root {
++      --bg: #0b1020;
++      --panel: #121a30;
++      --panel-2: #1a2442;
++      --text: #e8ecf8;
++      --muted: #a8b1cc;
++      --primary: #4f8cff;
++      --accent: #35d0b6;
++      --warning: #ffcb57;
++      --danger: #ff6b7a;
++      --ok: #4ad07f;
++      --border: #2d3b66;
++      --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
++    }
++
++    * { box-sizing: border-box; }
++
++    body {
++      margin: 0;
++      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
++      background: linear-gradient(135deg, #0a0f1f, #121b34);
++      color: var(--text);
++      min-height: 100vh;
++      display: grid;
++      grid-template-columns: 280px 1fr;
++    }
++
++    aside {
++      border-right: 1px solid var(--border);
++      background: rgba(10, 15, 31, 0.92);
++      backdrop-filter: blur(4px);
++      padding: 22px 16px;
++      position: sticky;
++      top: 0;
++      height: 100vh;
++      overflow: auto;
++    }
++
++    .brand {
++      display: flex;
++      align-items: center;
++      gap: 10px;
++      margin-bottom: 22px;
++      padding: 8px;
++      border-radius: 12px;
++      background: var(--panel);
++      border: 1px solid var(--border);
++    }
++
++    .logo {
++      width: 36px;
++      height: 36px;
++      border-radius: 10px;
++      background: linear-gradient(135deg, var(--primary), var(--accent));
++      box-shadow: var(--shadow);
++    }
++
++    .brand h1 {
++      margin: 0;
++      font-size: 15px;
++      line-height: 1.2;
++    }
++
++    .brand small {
++      color: var(--muted);
++      display: block;
++      font-size: 12px;
++      margin-top: 2px;
++    }
++
++    nav {
++      display: grid;
++      gap: 8px;
++    }
++
++    .tab {
++      all: unset;
++      cursor: pointer;
++      padding: 12px 12px;
++      border: 1px solid var(--border);
++      border-radius: 10px;
++      color: var(--text);
++      background: var(--panel);
++      transition: all .2s ease;
++      font-size: 14px;
++    }
++
++    .tab:hover {
++      transform: translateY(-1px);
++      border-color: #4f8cff77;
++    }
++
++    .tab.active {
++      background: linear-gradient(135deg, #2c4fa3, #2a6789);
++      border-color: #8cb3ff;
++      box-shadow: var(--shadow);
++    }
++
++    main {
++      padding: 22px;
++      display: grid;
++      gap: 16px;
++      align-content: start;
++    }
++
++    .topbar {
++      background: rgba(18, 26, 48, .86);
++      border: 1px solid var(--border);
++      border-radius: 14px;
++      padding: 14px 16px;
++      display: flex;
++      justify-content: space-between;
++      align-items: center;
++      gap: 10px;
++      box-shadow: var(--shadow);
++    }
++
++    .badge {
++      background: #1c2d58;
++      border: 1px solid #37518f;
++      padding: 4px 8px;
++      border-radius: 999px;
++      font-size: 12px;
++      color: #bcd2ff;
++    }
++
++    .grid {
++      display: grid;
++      gap: 14px;
++      grid-template-columns: repeat(12, 1fr);
++    }
++
++    .card {
++      background: rgba(18, 26, 48, .92);
++      border: 1px solid var(--border);
++      border-radius: 14px;
++      padding: 16px;
++      box-shadow: var(--shadow);
++    }
++
++    .kpi { grid-column: span 3; }
++    .full { grid-column: span 12; }
++    .half { grid-column: span 6; }
++    .third { grid-column: span 4; }
++
++    h2, h3, h4 {
++      margin-top: 0;
++      margin-bottom: 10px;
++    }
++
++    p { color: var(--muted); margin: 0 0 10px 0; }
++
++    table {
++      width: 100%;
++      border-collapse: collapse;
++      font-size: 13px;
++      color: var(--text);
++    }
++
++    th, td {
++      border-bottom: 1px solid var(--border);
++      padding: 9px 8px;
++      text-align: left;
++    }
++
++    .status {
++      font-size: 11px;
++      padding: 3px 8px;
++      border-radius: 999px;
++      border: 1px solid;
++      display: inline-block;
++    }
++
++    .ok { color: #8ff2b7; border-color: #2f8558; background: #193c2d; }
++    .warn { color: #ffe19c; border-color: #8a6a17; background: #3f3418; }
++    .err { color: #ffc0c7; border-color: #8f2532; background: #471a21; }
++
++    .flow {
++      display: flex;
++      gap: 12px;
++      flex-wrap: wrap;
++      align-items: center;
++    }
++
++    .node {
++      background: var(--panel-2);
++      border: 1px solid var(--border);
++      padding: 12px;
++      border-radius: 12px;
++      min-width: 180px;
++    }
++
++    .arrow { color: var(--muted); font-size: 20px; }
++
++    .hidden { display: none; }
++
++    .login-screen {
++      position: fixed;
++      inset: 0;
++      z-index: 999;
++      background: radial-gradient(circle at top, #16254a, #090d1b 55%);
++      display: grid;
++      place-items: center;
++      padding: 20px;
++    }
++
++    .login-card {
++      width: min(420px, 96vw);
++      background: rgba(18, 26, 48, 0.95);
++      border: 1px solid var(--border);
++      border-radius: 16px;
++      box-shadow: var(--shadow);
++      padding: 22px;
++    }
++
++    .login-card h2 {
++      margin: 0 0 8px 0;
++    }
++
++    .login-card p {
++      margin-bottom: 16px;
++    }
++
++    .login-input {
++      width: 100%;
++      padding: 11px 12px;
++      border-radius: 10px;
++      border: 1px solid var(--border);
++      background: #0f1830;
++      color: var(--text);
++      margin-bottom: 10px;
++    }
++
++    .login-btn {
++      width: 100%;
++      border: 1px solid #8cb3ff;
++      background: linear-gradient(135deg, #2c4fa3, #2a6789);
++      color: #fff;
++      border-radius: 10px;
++      padding: 11px 12px;
++      cursor: pointer;
++      font-weight: 600;
++    }
++
++    .login-error {
++      color: #ffb7bf;
++      min-height: 20px;
++      margin-top: 10px;
++      font-size: 13px;
++    }
++
++    @media (max-width: 1050px) {
++      body { grid-template-columns: 1fr; }
++      aside { height: auto; position: static; }
++      .kpi { grid-column: span 6; }
++      .half { grid-column: span 12; }
++      .third { grid-column: span 12; }
++    }
++  </style>
++</head>
++<body>
++  <section id="login-screen" class="login-screen">
++    <div class="login-card">
++      <h2>Acesso ao Protótipo</h2>
++      <p>Entre com suas credenciais para acessar o Health Integration Core.</p>
++      <input id="username" class="login-input" type="text" placeholder="Usuário" />
++      <input id="password" class="login-input" type="password" placeholder="Senha" />
++      <button id="login-btn" class="login-btn">Entrar</button>
++      <div id="login-error" class="login-error"></div>
++    </div>
++  </section>
++
++  <aside>
++    <div class="brand">
++      <div class="logo"></div>
++      <div>
++        <h1>Health Integration Core</h1>
++        <small>Protótipo Navegável</small>
++      </div>
++    </div>
++
++    <nav>
++      <button class="tab active" data-target="dashboard">Dashboard operacional</button>
++      <button class="tab" data-target="catalogo">Catálogo de integrações</button>
++      <button class="tab" data-target="flow">Flow Designer</button>
++      <button class="tab" data-target="monitoramento">Monitoramento (replay demo)</button>
++      <button class="tab" data-target="rules">Rules Engine</button>
++      <button class="tab" data-target="arquitetura">Visão de arquitetura</button>
++    </nav>
++  </aside>
++
++  <main>
++    <div class="topbar">
++      <div>
++        <strong>Ambiente: Sandbox Hospitalar</strong><br />
++        <span class="badge">Última sincronização: 30/03/2026 12:00 UTC</span>
++      </div>
++      <span class="badge">POC v1.0</span>
++    </div>
++
++    <section id="dashboard" class="screen">
++      <div class="grid">
++        <div class="card kpi">
++          <h3>Transações 24h</h3>
++          <h2>1.248.903</h2>
++          <p>+8,2% vs dia anterior</p>
++        </div>
++        <div class="card kpi">
++          <h3>Sucesso</h3>
++          <h2>99,72%</h2>
++          <p>Meta: ≥ 99,5%</p>
++        </div>
++        <div class="card kpi">
++          <h3>Latência P95</h3>
++          <h2>248 ms</h2>
++          <p>Threshold: 300 ms</p>
++        </div>
++        <div class="card kpi">
++          <h3>Alertas críticos</h3>
++          <h2>3</h2>
++          <p>2 em investigação</p>
++        </div>
++
++        <div class="card half">
++          <h3>Filas em tempo real</h3>
++          <table>
++            <thead><tr><th>Fila</th><th>Mensagens</th><th>Tempo médio</th><th>Status</th></tr></thead>
++            <tbody>
++              <tr><td>ADT Intake</td><td>3.214</td><td>120 ms</td><td><span class="status ok">Saudável</span></td></tr>
++              <tr><td>FHIR Outbound</td><td>8.904</td><td>240 ms</td><td><span class="status warn">Atenção</span></td></tr>
++              <tr><td>Claims API</td><td>1.180</td><td>98 ms</td><td><span class="status ok">Saudável</span></td></tr>
++            </tbody>
++          </table>
++        </div>
++
++        <div class="card half">
++          <h3>Incidentes abertos</h3>
++          <table>
++            <thead><tr><th>ID</th><th>Serviço</th><th>Severidade</th><th>Responsável</th></tr></thead>
++            <tbody>
++              <tr><td>INC-4472</td><td>Conector Tasy</td><td><span class="status warn">Média</span></td><td>Integrações Core</td></tr>
++              <tr><td>INC-4470</td><td>FHIR Gateway</td><td><span class="status err">Alta</span></td><td>SRE</td></tr>
++              <tr><td>INC-4468</td><td>Rules Engine</td><td><span class="status warn">Média</span></td><td>Plataforma</td></tr>
++            </tbody>
++          </table>
++        </div>
++      </div>
++    </section>
++
++    <section id="catalogo" class="screen hidden">
++      <div class="grid">
++        <div class="card full">
++          <h3>Catálogo de integrações</h3>
++          <p>Conectores homologados para hospitais, operadoras e laboratórios.</p>
++          <table>
++            <thead><tr><th>Integração</th><th>Tipo</th><th>Padrão</th><th>Versão</th><th>Status</th></tr></thead>
++            <tbody>
++              <tr><td>MV / Soul</td><td>Hospitalar</td><td>HL7 v2</td><td>2.7</td><td><span class="status ok">Ativo</span></td></tr>
++              <tr><td>Tasy</td><td>Hospitalar</td><td>FHIR</td><td>R4</td><td><span class="status ok">Ativo</span></td></tr>
++              <tr><td>Unimed Claims</td><td>Operadora</td><td>REST</td><td>v1</td><td><span class="status warn">Piloto</span></td></tr>
++              <tr><td>LIS Genérico</td><td>Laboratório</td><td>ASTM</td><td>1381</td><td><span class="status ok">Ativo</span></td></tr>
++            </tbody>
++          </table>
++        </div>
++      </div>
++    </section>
++
++    <section id="flow" class="screen hidden">
++      <div class="grid">
++        <div class="card full">
++          <h3>Flow Designer</h3>
++          <p>Exemplo de orquestração para admissão hospitalar com validação e roteamento.</p>
++          <div class="flow">
++            <div class="node"><strong>Evento ADT_A01</strong><br><small>Entrada HL7</small></div>
++            <div class="arrow">→</div>
++            <div class="node"><strong>Mapeamento</strong><br><small>HL7 → FHIR Patient</small></div>
++            <div class="arrow">→</div>
++            <div class="node"><strong>Regra LGPD</strong><br><small>Mascarar dados sensíveis</small></div>
++            <div class="arrow">→</div>
++            <div class="node"><strong>Destino</strong><br><small>Prontuário + Data Lake</small></div>
++          </div>
++        </div>
++      </div>
++    </section>
++
++    <section id="monitoramento" class="screen hidden">
++      <div class="grid">
++        <div class="card half">
++          <h3>Monitoramento</h3>
++          <p>Visão de saúde dos serviços com foco em throughput e erros por conector.</p>
++          <table>
++            <thead><tr><th>Serviço</th><th>Req/min</th><th>Erro</th><th>Replay</th></tr></thead>
++            <tbody>
++              <tr><td>FHIR Gateway</td><td>12.1k</td><td>0,21%</td><td><button>Reexecutar lote</button></td></tr>
++              <tr><td>Claims Adapter</td><td>3.8k</td><td>0,93%</td><td><button>Replay #9931</button></td></tr>
++              <tr><td>LIS Bridge</td><td>1.2k</td><td>0,08%</td><td><button>Replay #9932</button></td></tr>
++            </tbody>
++          </table>
++        </div>
++
++        <div class="card half">
++          <h3>Replay Demo</h3>
++          <p>Transação selecionada: <strong>TX-9931</strong>.</p>
++          <ol>
++            <li>Payload original recebido no Claims Adapter.</li>
++            <li>Erro de schema identificado no campo <code>beneficiaryId</code>.</li>
++            <li>Correção aplicada via template de transformação.</li>
++            <li>Reprocessamento concluído com status <span class="status ok">Sucesso</span>.</li>
++          </ol>
++        </div>
++      </div>
++    </section>
++
++    <section id="rules" class="screen hidden">
++      <div class="grid">
++        <div class="card full">
++          <h3>Rules Engine</h3>
++          <p>Regras dinâmicas para validação clínica e autorização administrativa.</p>
++          <table>
++            <thead><tr><th>Regra</th><th>Condição</th><th>Ação</th><th>Estado</th></tr></thead>
++            <tbody>
++              <tr><td>Prioridade UTI</td><td>NEWS2 ≥ 7</td><td>Escalonar para UTI</td><td><span class="status ok">Ativa</span></td></tr>
++              <tr><td>Pré-autorização imagem</td><td>Plano básico + exame alto custo</td><td>Enviar para auditoria</td><td><span class="status ok">Ativa</span></td></tr>
++              <tr><td>Bloqueio duplicidade</td><td>Mesmo CPF em 24h</td><td>Revisão manual</td><td><span class="status warn">Teste A/B</span></td></tr>
++            </tbody>
++          </table>
++        </div>
++      </div>
++    </section>
++
++    <section id="arquitetura" class="screen hidden">
++      <div class="grid">
++        <div class="card third">
++          <h4>Camada de Entrada</h4>
++          <p>APIs, filas, conectores HL7/FHIR e ingestão batch.</p>
++        </div>
++        <div class="card third">
++          <h4>Core de Orquestração</h4>
++          <p>Flow Designer, Rules Engine, transformação e roteamento.</p>
++        </div>
++        <div class="card third">
++          <h4>Observabilidade</h4>
++          <p>Tracing distribuído, métricas, alertas e replay operacional.</p>
++        </div>
++        <div class="card full">
++          <h3>Visão de Arquitetura (alto nível)</h3>
++          <div class="flow">
++            <div class="node">Sistemas Hospitalares</div>
++            <div class="arrow">→</div>
++            <div class="node">API Gateway / Broker</div>
++            <div class="arrow">→</div>
++            <div class="node">Health Integration Core</div>
++            <div class="arrow">→</div>
++            <div class="node">Operadoras / Laboratórios / Data Platform</div>
++          </div>
++        </div>
++      </div>
++    </section>
++  </main>
++
++  <script>
++    const loginScreen = document.getElementById('login-screen');
++    const loginBtn = document.getElementById('login-btn');
++    const loginError = document.getElementById('login-error');
++    const usernameInput = document.getElementById('username');
++    const passwordInput = document.getElementById('password');
++    const tabs = document.querySelectorAll('.tab');
++    const screens = document.querySelectorAll('.screen');
++
++    function authenticate() {
++      const username = usernameInput.value.trim();
++      const password = passwordInput.value;
++
++      if (username === 'admin' && password === 'admin') {
++        loginScreen.style.display = 'none';
++        loginError.textContent = '';
++      } else {
++        loginError.textContent = 'Usuário ou senha inválidos. Tente admin/admin.';
++      }
++    }
++
++    loginBtn.addEventListener('click', authenticate);
++    passwordInput.addEventListener('keydown', (event) => {
++      if (event.key === 'Enter') authenticate();
++    });
++
++    tabs.forEach(tab => {
++      tab.addEventListener('click', () => {
++        tabs.forEach(t => t.classList.remove('active'));
++        screens.forEach(screen => screen.classList.add('hidden'));
++        tab.classList.add('active');
++        document.getElementById(tab.dataset.target).classList.remove('hidden');
++      });
++    });
++  </script>
++</body>
++</html>
+ 
+EOF
+)
